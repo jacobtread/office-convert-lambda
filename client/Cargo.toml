@@ -1,0 +1,23 @@
+[package]
+name = "office-convert-lambda-client"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/jacobtread/office-convert-lambda"
+authors = ["Jacobtread <jacobtread@gmail.com>"]
+readme = "../README.md"
+description = "Client library for interacting with office-convert-lambda"
+
+[dependencies]
+# Lambda sdk to invoke the lambda
+aws-sdk-lambda = "1"
+
+# JSON and (de)serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error handling
+thiserror = "1"
+
+# Asynchronous primitives
+tokio = { version = "1", features = ["time"] }

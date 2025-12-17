@@ -2,6 +2,13 @@
 name = "office-convert-lambda"
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/jacobtread/office-convert-lambda"
+authors = ["Jacobtread <jacobtread@gmail.com>"]
+readme = "./README.md"
+description = "Lambda for converting office files using LibreOffice"
+
+[workspace]
+members = [".", "./client"]
 
 [dependencies]
 # Lambda core

@@ -8,6 +8,7 @@
     "thiserror",
     "dotenvy",
     "libreofficekit",
-    "oneshot"
+    "oneshot",
+    "Jacobtread"
   ]
 }
