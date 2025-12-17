@@ -2054,13 +2054,11 @@ dependencies = [
 name = "office-convert-lambda"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "aws-config",
  "aws-sdk-s3",
  "dotenvy",
  "lambda_runtime",
  "libreofficekit",
- "parking_lot",
  "serde",
  "serde_json",
  "testcontainers",

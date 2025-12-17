@@ -30,9 +30,6 @@ uuid = { version = "1.19.0", features = ["v4"] }
 
 # Core libreoffice library
 libreofficekit = { version = "0.5" }
-anyhow = "1.0.100"
-parking_lot = "0.12.5"
-
 
 [dev-dependencies]
 testcontainers = { version = "=0.25.2", features = ["http_wait"] }
