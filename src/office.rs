@@ -8,6 +8,8 @@ use libreofficekit::{CallbackType, DocUrl, Office, OfficeError, OfficeOptionalFe
 use thiserror::Error;
 use tokio::sync::{mpsc, oneshot};
 
+use crate::error::LambdaError;
+
 /// Message for the [OfficeHandle]
 pub struct ConvertMessage {
     /// Input file path
@@ -20,7 +22,36 @@ pub struct ConvertMessage {
 
 /// Handle to send messages to the office runner
 #[derive(Clone)]
-pub struct OfficeHandle(pub mpsc::Sender<ConvertMessage>);
+pub struct OfficeHandle(mpsc::Sender<ConvertMessage>);
+
+impl OfficeHandle {
+    pub async fn convert(
+        &self,
+        input_path: PathBuf,
+        output_path: PathBuf,
+    ) -> Result<Result<(), OfficeConvertError>, LambdaError> {
+        let (tx, rx) = oneshot::channel();
+        self.0
+            .send(ConvertMessage {
+                input_path,
+                output_path,
+                tx,
+            })
+            .await
+            .map_err(|err| {
+                tracing::error!(?err, "failed to send message to office worker");
+                LambdaError::RunOffice
+            })?;
+
+        // Wait for the response
+        let result = rx.await.map_err(|err| {
+            tracing::error!(?err, "error waiting for office worker");
+            LambdaError::ResponseError
+        })?;
+
+        Ok(result)
+    }
+}
 
 #[derive(Debug, Error)]
 pub enum OfficeRunnerError {

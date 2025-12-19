@@ -9,6 +9,8 @@
     "dotenvy",
     "libreofficekit",
     "oneshot",
-    "Jacobtread"
+    "Jacobtread",
+    "dotenv",
+    "msoffice"
   ]
 }

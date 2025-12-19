@@ -84,7 +84,11 @@ impl ConvertError {
             // Error reasons that can be retried
             ConvertError::Lambda(error) => matches!(
                 error.reason.as_str(),
-                "SETUP_TEMP_DIR_FAILED" | "SETUP_TEMP_FAILED" | "RUN_OFFICE" | "RESPONSE_ERROR"
+                "SETUP_TEMP_DIR_FAILED"
+                    | "INITIALIZE_OFFICE"
+                    | "SETUP_TEMP_FAILED"
+                    | "RUN_OFFICE"
+                    | "RESPONSE_ERROR"
             ),
         }
     }

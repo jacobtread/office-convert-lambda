@@ -1,6 +1,7 @@
 use event_handler::function_handler;
 use lambda_runtime::{Error, run, service_fn, tracing};
 
+mod aws;
 mod encrypted;
 mod error;
 mod event_handler;
