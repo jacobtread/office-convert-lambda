@@ -1,8 +1,3 @@
-use std::{
-    env::temp_dir,
-    path::{Path, PathBuf, absolute},
-};
-
 use crate::{
     encrypted::{self, FileCondition, get_file_condition},
     error::LambdaError,
@@ -14,6 +9,10 @@ use lambda_runtime::LambdaEvent;
 use libreofficekit::Office;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::{
+    env::temp_dir,
+    path::{Path, PathBuf, absolute},
+};
 use tokio::{
     io::AsyncReadExt,
     sync::{OnceCell, oneshot},
@@ -69,11 +68,15 @@ async fn dependencies() -> Result<Dependencies, LambdaError> {
         }
     };
 
+    tracing::debug!(?office_path, "initializing office");
+
     // Create office access and get office details
     let office_handle = create_office_runner(office_path).await.map_err(|err| {
         tracing::error!(?err, "failed to create temporary directory");
         LambdaError::new("failed to create office runner", "INITIALIZE_OFFICE")
     })?;
+
+    tracing::debug!("office initialized");
 
     Ok(Dependencies {
         s3_client,

@@ -1,1 +1,1 @@
-docker buildx build --platform linux/amd64,linux/arm64 -t onlyoffice-convert-lambda .
+docker buildx build --platform linux/amd64,linux/arm64 -t office-convert-lambda .
