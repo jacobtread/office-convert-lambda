@@ -19,7 +19,7 @@ impl OfficeConvertLambda {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct OfficeConvertLambdaOptions {
     /// The name or ARN of the Lambda function, version, or alias.
     pub function_name: String,
@@ -74,6 +74,22 @@ pub enum ConvertError {
     Lambda(#[from] OfficeLambdaError),
 }
 
+impl ConvertError {
+    pub fn is_retry(&self) -> bool {
+        match self {
+            // Cannot retry serde failures
+            ConvertError::Serde(_) => false,
+            // Should retry lambda invoke errors
+            ConvertError::Invoke(_) => true,
+            // Error reasons that can be retried
+            ConvertError::Lambda(error) => matches!(
+                error.reason.as_str(),
+                "SETUP_TEMP_DIR_FAILED" | "SETUP_TEMP_FAILED" | "RUN_OFFICE" | "RESPONSE_ERROR"
+            ),
+        }
+    }
+}
+
 impl OfficeConvertLambda {
     /// Perform an invoke of the convert lambda using a [ConvertRequest] based
     /// on files already present in S3
@@ -91,6 +107,10 @@ impl OfficeConvertLambda {
             match self.convert_inner(&request).await {
                 Ok(_) => return Ok(()),
                 Err(error) => {
+                    if !error.is_retry() {
+                        return Err(error);
+                    }
+
                     err = error;
                 }
             }
