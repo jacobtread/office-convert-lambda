@@ -44,7 +44,7 @@ jobs:
             # Copy built binary to output directory
             - name: Copy binary to output
               run: |
-                  cp target/lambda/onlyoffice-convert-lambda/bootstrap bootstrap
+                  cp target/lambda/office-convert-lambda/bootstrap bootstrap
               shell: bash
 
             # Upload the built artifacts
@@ -84,7 +84,7 @@ jobs:
             # Copy built binary to output directory
             - name: Copy binary to output
               run: |
-                  cp target/lambda/onlyoffice-convert-lambda/bootstrap bootstrap-arm64
+                  cp target/lambda/office-convert-lambda/bootstrap bootstrap-arm64
               shell: bash
 
             # Upload the built artifacts
