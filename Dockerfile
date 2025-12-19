@@ -37,18 +37,13 @@ RUN ARCH=$(uname -m) && \
     rpm -Uvh *.rpm && \
     dnf clean all
 
-
-
 # Download lambda script
-# RUN ARCH=$(uname -m) && \
-#     if [ "$ARCH" = "x86_64" ]; then FILE="bootstrap"; \
-#     elif [ "$ARCH" = "aarch64" ]; then FILE="bootstrap-arm64"; \
-#     else echo "Unsupported architecture: $ARCH" >&2; exit 1; fi && \
-#     curl -L -o /var/runtime/bootstrap https://github.com/jacobtread/office-convert-lambda/releases/download/0.1.0/${FILE}?2 && \
-#     chmod +x /var/runtime/bootstrap
-
-COPY target/lambda/office-convert-lambda/bootstrap /var/runtime/bootstrap
-RUN chmod +x /var/runtime/bootstrap
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then FILE="bootstrap"; \
+    elif [ "$ARCH" = "aarch64" ]; then FILE="bootstrap-arm64"; \
+    else echo "Unsupported architecture: $ARCH" >&2; exit 1; fi && \
+    curl -L -o /var/runtime/bootstrap https://github.com/jacobtread/office-convert-lambda/releases/download/0.1.0/${FILE} && \
+    chmod +x /var/runtime/bootstrap
 
 # Update library path to ensure the libreoffice versions are used
 ENV LO_PATH=/opt/libreoffice25.8/program
