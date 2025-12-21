@@ -1,0 +1,29 @@
+[env]
+# LibreOffice version
+PACKAGE_VERSION="25.8.3"
+
+# Lambda release version
+LAMBDA_VERSION="0.1.0"
+
+# RELEASE_VERSION=0.1.0 cargo make -t docker-publish
+[tasks.docker-publish]
+workspace = false
+command = "docker"
+args = [
+    "buildx",
+    "build",
+    "--platform",
+    "linux/amd64,linux/arm64",
+    "-t",
+    "jacobtread/office-convert-lambda:${RELEASE_VERSION}",
+    "-t",
+    "jacobtread/office-convert-lambda:latest",
+    "-f",
+    "Dockerfile",
+    "--push",
+    ".",
+    "--build-arg",
+    "PACKAGE_VERSION=${PACKAGE_VERSION}",
+    "--build-arg",
+    "LAMBDA_VERSION=${PACKAGE_VERSION}",
+]
