@@ -1,13 +1,13 @@
 name: Publish Docker image to GHCR
 
-# Run on release published
+# Triggers
 on:
-    release:
-        types: [published, edited]
-
-permissions:
-    contents: read
-    packages: write
+    workflow_dispatch:
+        inputs:
+            release_tag:
+                description: "Release tag to build the Docker image from"
+                required: true
+                default: "1.0.0"
 
 jobs:
     build-and-push:
@@ -36,7 +36,7 @@ jobs:
                   platforms: linux/amd64,linux/arm64
                   push: true
                   build-args: |
-                      LAMBDA_VERSION=${{ github.event.release.tag_name }}
+                      LAMBDA_VERSION=${{ github.event.inputs.release_tag }}
                   tags: |
-                      ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}
+                      ghcr.io/${{ github.repository }}:${{ github.event.inputs.release_tag }}
                       ghcr.io/${{ github.repository }}:latest
