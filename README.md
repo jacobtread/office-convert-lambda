@@ -27,10 +27,3 @@ ghcr.io/jacobtread/office-convert-lambda:latest
 ```
 jacobtread/office-convert-lambda:latest
 ```
-
-## Instructions for deploy
-
-- Create an Elastic Container Registry for the image
-- Build image for ARM `docker buildx build --platform linux/arm64 -t office-convert-lambda .`
-- Follow the "Push Instructions" from the ECR page for the container image to upload it, append `--platform linux/arm64` to the push command
-- Deploy ARM based container lambda using the container image
