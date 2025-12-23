@@ -6,6 +6,28 @@ Simple lambda for converting office file formats into PDF files built on top of 
 
 This repository contains two separate crates, the first being `office-convert-lambda` which is the crate for the lambda itself. The second is `office-convert-lambda-client` in the client directory which is a library crate providing a client for interacting with the lambda.
 
+## Lambda Container Image
+
+This lambda is provided as a container image to use on AWS lambda, you can source the Docker image from one of the following repositories:
+
+### AWS ECR (Recommended)
+
+```
+public.ecr.aws/w0u2v3n7/office-convert-lambda:latest
+```
+
+### GHCR
+
+```
+ghcr.io/jacobtread/office-convert-lambda:latest
+```
+
+### Docker Hub
+
+```
+jacobtread/office-convert-lambda:latest
+```
+
 ## Instructions for deploy
 
 - Create an Elastic Container Registry for the image
