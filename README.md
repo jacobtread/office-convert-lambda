@@ -13,17 +13,17 @@ This lambda is provided as a container image to use on AWS lambda, you can sourc
 ### AWS ECR (Recommended)
 
 ```
-public.ecr.aws/jacobtread/office-convert-lambda:latest
+public.ecr.aws/jacobtread/office-convert-lambda:0.1.0
 ```
 
 ### GHCR
 
 ```
-ghcr.io/jacobtread/office-convert-lambda:latest
+ghcr.io/jacobtread/office-convert-lambda:0.1.0
 ```
 
 ### Docker Hub
 
 ```
-jacobtread/office-convert-lambda:latest
+jacobtread/office-convert-lambda:0.1.0
 ```
