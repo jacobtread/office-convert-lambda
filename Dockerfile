@@ -35,7 +35,8 @@ RUN ARCH=$(uname -m) && \
     tar -xzf /tmp/$PACKAGE_FILE && \
     cd LibreOffice_*_Linux_${ARCH_ALT}_rpm/RPMS && \
     rpm -Uvh *.rpm && \
-    dnf clean all
+    dnf clean all && \
+    rm -rf LibreOffice_*_Linux_${ARCH_ALT}_rpm /tmp/$PACKAGE_FILE
 
 ARG LAMBDA_VERSION=0.1.0
 
@@ -47,8 +48,10 @@ RUN ARCH=$(uname -m) && \
     curl -L -o /var/runtime/bootstrap https://github.com/jacobtread/office-convert-lambda/releases/download/${LAMBDA_VERSION}/${FILE} && \
     chmod +x /var/runtime/bootstrap
 
+ENV LIBREOFFICE_PATH=/opt/libreoffice25.8
+
 # Update library path to ensure the libreoffice versions are used
-ENV LO_PATH=/opt/libreoffice25.8/program
+ENV LO_PATH=${LIBREOFFICE_PATH}/program
 ENV LD_LIBRARY_PATH=${LO_PATH}
 
 # https://wiki.documentfoundation.org/Development/Environment_variables
@@ -60,6 +63,34 @@ ENV SAL_DISABLE_LOCKING=1
 # (Lambda file system is mostly readonly so these need to use paths from /tmp)
 RUN mkdir /tmp/lo_home && mkdir /tmp/lo_profile
 ENV UserInstallation=file:///tmp/lo_profile
-ENV URE_BOOTSTRAP=file:///opt/libreoffice25.8/program/fundamentalrc
+ENV URE_BOOTSTRAP=file://${LO_PATH}/fundamentalrc
+
+
+# Delete unused files to reduce final image size
+RUN rm -rf ${LIBREOFFICE_PATH}/share/help \
+    ${LIBREOFFICE_PATH}/help \
+    ${LIBREOFFICE_PATH}/readmes \
+    ${LIBREOFFICE_PATH}/NOTICE* \
+    ${LIBREOFFICE_PATH}/CREDITS* \
+    ${LIBREOFFICE_PATH}/LICENSE* \
+    ${LIBREOFFICE_PATH}/RELEASE-NOTES* \
+    ${LIBREOFFICE_PATH}/program/desktop \
+    ${LIBREOFFICE_PATH}/program/swriter \
+    ${LIBREOFFICE_PATH}/program/scalc \
+    ${LIBREOFFICE_PATH}/program/simpress \
+    ${LIBREOFFICE_PATH}/program/*macro*.so \
+    ${LIBREOFFICE_PATH}/program/*template*.xcu \
+    ${LIBREOFFICE_PATH}/program/python-core*/python* \
+    ${LIBREOFFICE_PATH}/program/python-core*/lib/python*/test \
+    ${LIBREOFFICE_PATH}/share/templates/* \
+    ${LIBREOFFICE_PATH}/share/gallery/* \
+    ${LIBREOFFICE_PATH}/share/config/images/* \
+    ${LIBREOFFICE_PATH}/share/config/images_* \
+    ${LIBREOFFICE_PATH}/share/extensions/wiki-publisher \
+    ${LIBREOFFICE_PATH}/share/extensions/nlpsolver
+
+# Pre-warm LibreOffice caches to speed cold start
+RUN mkdir -p /tmp/lo_profile && \
+    soffice --headless --convert-to pdf /dev/null || true
 
 CMD [ "/var/runtime/bootstrap"]
