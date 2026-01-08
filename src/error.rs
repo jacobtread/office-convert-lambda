@@ -68,6 +68,9 @@ pub enum LambdaError {
 
     #[error("failed to convert file: {0}")]
     ConvertFailed(String),
+
+    #[error("invalid convert timeout seconds value")]
+    InvalidConvertTimeoutSeconds,
 }
 
 impl LambdaError {
@@ -93,6 +96,7 @@ impl LambdaError {
             LambdaError::FileLikelyEncrypted => "FILE_LIKELY_ENCRYPTED",
             LambdaError::FileLikelyCorrupted => "FILE_LIKELY_CORRUPTED",
             LambdaError::ConvertFailed(_) => "CONVERT_FAILED",
+            LambdaError::InvalidConvertTimeoutSeconds => "INVALID_CONVERT_TIMEOUT_SECONDS",
         }
     }
 }

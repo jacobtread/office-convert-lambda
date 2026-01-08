@@ -12,8 +12,12 @@ use lambda_runtime::LambdaEvent;
 use libreofficekit::Office;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::path::{Path, PathBuf, absolute};
-use tokio::sync::OnceCell;
+use std::{
+    path::{Path, PathBuf, absolute},
+    str::FromStr,
+    time::Duration,
+};
+use tokio::{sync::OnceCell, time::sleep};
 
 /// Global dependencies store
 static DEPENDENCIES: OnceCell<Dependencies> = OnceCell::const_new();
@@ -24,6 +28,13 @@ pub struct Dependencies {
     s3_client: aws_sdk_s3::Client,
     /// Handle to LibreOffice to perform operations
     office_handle: OfficeHandle,
+    /// Timeout when handling requests before the lambda is terminated forcefully.
+    ///
+    /// This is required in the event that the office instance because hard locked
+    /// preventing requests from being handled. If this timeout is reached while
+    /// attempting to convert the lambda is killed directly so that a new cold started
+    /// instance can run freshly
+    timeout: Duration,
 }
 
 // Try loading office path from environment variables
@@ -62,9 +73,19 @@ async fn dependencies() -> Result<Dependencies, LambdaErrorResponse> {
 
     tracing::debug!("office initialized");
 
+    // Duration in seconds for timeout
+    let timeout = std::env::var("CONVERT_TIMEOUT_SECONDS")
+        .ok()
+        .map(|value| u64::from_str(&value))
+        .transpose()
+        .map_err(|_| LambdaError::InvalidConvertTimeoutSeconds)?
+        .map(Duration::from_secs)
+        .unwrap_or(Duration::from_secs(60));
+
     Ok(Dependencies {
         s3_client,
         office_handle,
+        timeout,
     })
 }
 
@@ -119,20 +140,38 @@ async fn handle_request(event: LambdaEvent<Value>) -> Result<(), LambdaErrorResp
                 LambdaError::SetupTempPathFailed
             })?;
 
-    let result = convert(
+    let convert_future = convert(
         &dependencies.s3_client,
         &dependencies.office_handle,
         request,
         &input_path,
         &output_path,
-    )
-    .await;
+    );
 
-    tokio::spawn(cleanup(input_path, output_path));
+    let timeout_future = sleep(dependencies.timeout);
 
-    result?;
+    tokio::select! {
+        result = convert_future => {
+            result?;
+
+            // Spawn background cleanup
+            tokio::spawn(cleanup(input_path, output_path));
+        },
+        _ = timeout_future => {
+            abort();
+        }
+    }
 
     Ok(())
+}
+
+/// Internal abortion logic, report the failure to log and
+/// abort the program. This state is only reached if the timeout
+/// for converting has been reached and is used to force the lambda
+/// to use a new process instance
+fn abort() {
+    tracing::error!("aborted due to timeout exceeded");
+    std::process::abort();
 }
 
 async fn convert(
