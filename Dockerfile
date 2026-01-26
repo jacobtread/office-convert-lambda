@@ -14,10 +14,13 @@ RUN dnf -y update && \
     libX11 \
     libXext \
     libX11-xcb \
+    libXinerama \
     fontconfig \
     freetype \
     cups-libs \
     libxslt \
+    python3 \
+    python3-libs \
     wget \
     tar \
     gzip && \
@@ -32,11 +35,11 @@ RUN ARCH=$(uname -m) && \
     FOLDER_NAME="LibreOffice_${PACKAGE_VERSION}_Linux_${ARCH_ALT}_rpm" && \
     DOWNLOAD_URL="${PACKAGE_BASE_URL}/${PACKAGE_VERSION}/rpm/${ARCH}/${PACKAGE_FILE}"  && \
     wget -q -P /tmp ${DOWNLOAD_URL} && \
-    tar -xzf /tmp/$PACKAGE_FILE && \
-    cd LibreOffice_*_Linux_${ARCH_ALT}_rpm/RPMS && \
+    tar -xzf /tmp/$PACKAGE_FILE -C /tmp && \
+    cd /tmp/LibreOffice_*_Linux_${ARCH_ALT}_rpm/RPMS && \
     rpm -Uvh *.rpm && \
     dnf clean all && \
-    rm -rf LibreOffice_*_Linux_${ARCH_ALT}_rpm /tmp/$PACKAGE_FILE
+    rm -rf tmp/LibreOffice_*_Linux_${ARCH_ALT}_rpm /tmp/$PACKAGE_FILE
 
 ARG LAMBDA_VERSION=0.1.0
 
@@ -47,6 +50,9 @@ RUN ARCH=$(uname -m) && \
     else echo "Unsupported architecture: $ARCH" >&2; exit 1; fi && \
     curl -L -o /var/runtime/bootstrap https://github.com/jacobtread/office-convert-lambda/releases/download/${LAMBDA_VERSION}/${FILE} && \
     chmod +x /var/runtime/bootstrap
+
+# COPY ./target/lambda/office-convert-lambda/bootstrap /var/runtime/bootstrap
+# RUN chmod +x /var/runtime/bootstrap
 
 ENV LIBREOFFICE_PATH=/opt/libreoffice25.8
 
@@ -62,9 +68,9 @@ ENV SAL_DISABLE_LOCKING=1
 # Forcefully override the paths libreoffice uses
 # (Lambda file system is mostly readonly so these need to use paths from /tmp)
 RUN mkdir /tmp/lo_home && mkdir /tmp/lo_profile
+ENV HOME=/tmp
 ENV UserInstallation=file:///tmp/lo_profile
 ENV URE_BOOTSTRAP=file://${LO_PATH}/fundamentalrc
-
 
 # Delete unused files to reduce final image size
 RUN rm -rf ${LIBREOFFICE_PATH}/share/help \
@@ -91,6 +97,6 @@ RUN rm -rf ${LIBREOFFICE_PATH}/share/help \
 
 # Pre-warm LibreOffice caches to speed cold start
 RUN mkdir -p /tmp/lo_profile && \
-    soffice --headless --convert-to pdf /dev/null || true
+    ${LO_PATH}/soffice --headless --convert-to pdf /dev/null || true
 
 CMD [ "/var/runtime/bootstrap"]
