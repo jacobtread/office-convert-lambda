@@ -15,7 +15,7 @@ members = [".", "./client"]
 lambda_runtime = "=1.0.1"
 
 # Async runtime
-tokio = { version = "=1.48.0", features = ["macros"] }
+tokio = { version = "=1.48.0", features = ["macros", "fs"] }
 
 # Environment variables
 dotenvy = "=0.15.7"
@@ -37,3 +37,5 @@ uuid = { version = "=1.19.0", features = ["v4"] }
 
 # Core libreoffice library
 libreofficekit = { version = "=0.5" }
+tar = "0.4.44"
+zstd = "0.13.3"

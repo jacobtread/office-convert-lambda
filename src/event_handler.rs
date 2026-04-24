@@ -49,6 +49,7 @@ async fn dependencies() -> Result<Dependencies, LambdaErrorResponse> {
     let s3_client = s3_client(&sdk_config);
 
     let office_path: PathBuf = office_path_env()
+        .inspect(|value| tracing::debug!("office path environment: {}", value.display()))
         // Fall back to automatic detection when not provided
         .or_else(Office::find_install_path)
         // Handle no path found and none provided
