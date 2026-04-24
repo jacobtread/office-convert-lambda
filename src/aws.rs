@@ -7,7 +7,7 @@ pub async fn aws_config() -> SdkConfig {
         .or_else("ap-southeast-2");
 
     // Load the configuration from env variables (See https://docs.aws.amazon.com/sdkref/latest/guide/settings-reference.html#EVarSettings)
-    aws_config::defaults(BehaviorVersion::v2025_08_07())
+    aws_config::defaults(BehaviorVersion::v2026_01_12())
         // Setup the region provider
         .region(region_provider)
         .load()
