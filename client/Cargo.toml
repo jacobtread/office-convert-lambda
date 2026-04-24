@@ -1,6 +1,6 @@
 [package]
 name = "office-convert-lambda-client"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "MIT"
 repository = "https://github.com/jacobtread/office-convert-lambda"
@@ -10,7 +10,10 @@ description = "Client library for interacting with office-convert-lambda"
 
 [dependencies]
 # Lambda sdk to invoke the lambda
-aws-sdk-lambda = "1"
+aws-sdk-lambda = { version = "1", default-features = false, features = [
+  "default-https-client",
+  "rt-tokio",
+] }
 
 # JSON and (de)serialization
 serde = { version = "1", features = ["derive"] }
